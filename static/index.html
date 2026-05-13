@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinese Checkers</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Chinese Checkers</h1>
+
+    <div class="container">
+        <!-- Lobby: Create or Join -->
+        <div id="lobby">
+            <h2>Play Online</h2>
+            <div class="form-group">
+                <label for="player-name">Your Name</label>
+                <input type="text" id="player-name" placeholder="Enter your name" maxlength="20" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="game-password">Game Password</label>
+                <input type="text" id="game-password" placeholder="Choose or enter a password" maxlength="30" autocomplete="off">
+            </div>
+            <div class="btn-row">
+                <button class="btn-primary" id="btn-create">Create Game</button>
+                <button class="btn-secondary" id="btn-join">Join Game</button>
+            </div>
+        </div>
+
+        <!-- Waiting room -->
+        <div id="waiting" class="hidden">
+            <h2>Waiting for Players</h2>
+            <p>Share this password with friends:</p>
+            <div class="password-display" id="password-display" title="Click to copy">
+                <span id="show-password"></span>
+                <span class="hint">click to copy</span>
+            </div>
+            <ul class="player-list" id="player-list"></ul>
+            <p class="player-count-note">Need 2, 3, 4, or 6 players to start</p>
+            <button class="btn-start" id="btn-start" disabled>Start Game</button>
+            <button class="btn-danger" id="btn-stop-lobby" style="margin-top:10px;width:100%;padding:10px;">Cancel Game</button>
+        </div>
+
+        <!-- Game area -->
+        <div id="game-area" class="hidden">
+            <div id="turn-info"></div>
+            <div class="player-legend" id="player-legend"></div>
+            <canvas id="game-canvas" width="720" height="720"></canvas>
+            <div id="game-controls">
+                <button class="btn-danger" id="btn-stop-game">Stop Game</button>
+            </div>
+        </div>
+
+        <!-- Game over overlay -->
+        <div id="game-over" class="hidden">
+            <div class="modal">
+                <h2 id="winner-text">Game Over!</h2>
+                <p id="winner-detail"></p>
+                <button class="btn-primary" id="btn-new-game">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script src="/static/game.js"></script>
+</body>
+</html>
