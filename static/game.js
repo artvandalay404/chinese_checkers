@@ -129,6 +129,14 @@ function handleMessage(data) {
             draw();
             break;
 
+        case 'hints_toggled':
+            gameState = data.state;
+            updateHintsButton();
+            // Clear any displayed hints if turned off
+            if (!gameState.show_hints) { validMoves = []; }
+            draw();
+            break;
+
         case 'moved':
             gameState = data.state;
             selectedPos = null;
@@ -216,8 +224,16 @@ function showGame() {
     hide(lobby); hide(waiting); hide(gameOverlay);
     show(gameArea);
     document.getElementById('btn-stop-game').classList.toggle('hidden', !isHost);
+    document.getElementById('btn-toggle-hints').classList.toggle('hidden', !isHost);
+    updateHintsButton();
     buildLegend();
     updateTurnInfo();
+}
+
+function updateHintsButton() {
+    const btn = document.getElementById('btn-toggle-hints');
+    if (!gameState) return;
+    btn.textContent = gameState.show_hints ? 'Hints: ON' : 'Hints: OFF';
 }
 
 function showGameOver(winnerName, reason) {
@@ -373,6 +389,7 @@ function drawSelection() {
 }
 
 function drawValidMoves() {
+    if (gameState && !gameState.show_hints) return;
     for (const [r, c] of validMoves) {
         const { x, y } = toPixel(r, c);
         ctx.beginPath();
@@ -437,6 +454,7 @@ document.getElementById('btn-join').addEventListener('click', () => {
 });
 
 document.getElementById('btn-start').addEventListener('click', () => sendMsg({ type: 'start' }));
+document.getElementById('btn-toggle-hints').addEventListener('click', () => sendMsg({ type: 'toggle_hints' }));
 document.getElementById('btn-stop-lobby').addEventListener('click', () => sendMsg({ type: 'stop' }));
 document.getElementById('btn-stop-game').addEventListener('click', () => {
     if (confirm('Stop the game?')) sendMsg({ type: 'stop' });

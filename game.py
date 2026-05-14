@@ -132,6 +132,7 @@ class Game:
         self.current_turn_index: int = 0  # index into self.players
         self.winner: int | None = None
         self.disconnected: set[str] = set()  # player IDs that disconnected
+        self.show_hints: bool = True  # whether to highlight valid moves
 
     def create(self, name: str, player_id: str, password: str):
         self.reset()
@@ -348,6 +349,7 @@ class Game:
             "board": board_data,
             "current_turn": self.current_turn_index,
             "winner": self.winner,
+            "show_hints": self.show_hints,
         }
 
     def get_board_definition(self) -> dict:

@@ -152,6 +152,18 @@ async def handle_move(ws: WebSocket, data: dict, player_id: str):
         await send_error(ws, str(e))
 
 
+async def handle_toggle_hints(ws: WebSocket, player_id: str):
+    if player_id != game.host_id:
+        await send_error(ws, "Only the host can toggle move hints")
+        return
+
+    game.show_hints = not game.show_hints
+    await broadcast({
+        "type": "hints_toggled",
+        "state": game.get_state(),
+    })
+
+
 async def handle_stop(ws: WebSocket, player_id: str):
     if player_id != game.host_id:
         await send_error(ws, "Only the host can stop the game")
@@ -187,6 +199,9 @@ async def websocket_endpoint(ws: WebSocket):
 
             elif msg_type == "move" and player_id:
                 await handle_move(ws, data, player_id)
+
+            elif msg_type == "toggle_hints" and player_id:
+                await handle_toggle_hints(ws, player_id)
 
             elif msg_type == "stop" and player_id:
                 await handle_stop(ws, player_id)
