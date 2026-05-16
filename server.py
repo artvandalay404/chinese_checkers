@@ -1,5 +1,6 @@
 """FastAPI WebSocket server for Chinese Checkers."""
 
+import asyncio
 import json
 import uuid
 from contextlib import asynccontextmanager
@@ -17,9 +18,22 @@ game = Game()
 connections: dict[str, WebSocket] = {}
 
 
+async def keepalive():
+    ping = json.dumps({"type": "ping"})
+    while True:
+        await asyncio.sleep(30)
+        for ws in list(connections.values()):
+            try:
+                await ws.send_text(ping)
+            except Exception:
+                pass
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    task = asyncio.create_task(keepalive())
     yield
+    task.cancel()
     connections.clear()
 
 
