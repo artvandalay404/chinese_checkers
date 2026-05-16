@@ -122,6 +122,7 @@ function handleMessage(data) {
             validMoves = [];
             showGame();
             draw();
+            updateTurnInfo();
             break;
 
         case 'valid_moves':
@@ -223,12 +224,10 @@ function updateWaitingRoom() {
 function showGame() {
     hide(lobby); hide(waiting); hide(gameOverlay);
     show(gameArea);
-    hide(document.getElementById('btn-pass-turn'));
     document.getElementById('btn-stop-game').classList.toggle('hidden', !isHost);
     document.getElementById('btn-toggle-hints').classList.toggle('hidden', !isHost);
     updateHintsButton();
     buildLegend();
-    updateTurnInfo();
 }
 
 function updateHintsButton() {
