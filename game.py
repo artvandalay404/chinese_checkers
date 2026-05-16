@@ -316,20 +316,28 @@ class Game:
                 return
         # All players disconnected — shouldn't happen in practice
 
-    def remove_player(self, player_id: str):
-        """Handle a player disconnecting."""
-        self.disconnected.add(player_id)
-        if self.phase == "playing":
-            # If it was their turn, advance
-            current = self.get_current_player()
-            if current and current["id"] == player_id:
-                self._advance_turn()
+    def remove_player(self, player_id: str) -> dict:
+        """Handle a player disconnecting. Returns {"host_left": bool}."""
+        if self.phase == "lobby":
+            was_host = player_id == self.host_id
+            self.players = [p for p in self.players if p["id"] != player_id]
+            if was_host:
+                self.reset()
+                return {"host_left": True}
+            return {"host_left": False}
 
-            # Check if only one player left
-            active = [p for p in self.players if p["id"] not in self.disconnected]
-            if len(active) <= 1 and active:
-                self.phase = "finished"
-                self.winner = self.players.index(active[0])
+        # playing phase
+        self.disconnected.add(player_id)
+        current = self.get_current_player()
+        if current and current["id"] == player_id:
+            self._advance_turn()
+
+        active = [p for p in self.players if p["id"] not in self.disconnected]
+        if len(active) <= 1 and active:
+            self.phase = "finished"
+            self.winner = self.players.index(active[0])
+
+        return {"host_left": False}
 
     def get_state(self) -> dict:
         """Get full game state for sending to clients."""

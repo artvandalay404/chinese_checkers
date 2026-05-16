@@ -223,6 +223,7 @@ function updateWaitingRoom() {
 function showGame() {
     hide(lobby); hide(waiting); hide(gameOverlay);
     show(gameArea);
+    hide(document.getElementById('btn-pass-turn'));
     document.getElementById('btn-stop-game').classList.toggle('hidden', !isHost);
     document.getElementById('btn-toggle-hints').classList.toggle('hidden', !isHost);
     updateHintsButton();
@@ -273,13 +274,19 @@ function buildLegend() {
 
 function updateTurnInfo() {
     const el = document.getElementById('turn-info');
-    if (!gameState || gameState.phase !== 'playing') { el.textContent = ''; return; }
+    const passBtn = document.getElementById('btn-pass-turn');
+    if (!gameState || gameState.phase !== 'playing') {
+        el.textContent = '';
+        passBtn.classList.add('hidden');
+        return;
+    }
     const cur = gameState.players[gameState.current_turn];
     const color = SLOT_COLORS[cur.slot] || '#888';
     const mine = gameState.current_turn === myIndex;
     el.innerHTML = mine
         ? `<span style="color:${color}">Your turn!</span> Select a piece to move.`
         : `<span style="color:${color}">${esc(cur.name)}</span>'s turn`;
+    passBtn.classList.toggle('hidden', !mine);
 }
 
 // ── Board helpers ──────────────────────────────────────────────────────────
@@ -454,6 +461,7 @@ document.getElementById('btn-join').addEventListener('click', () => {
 });
 
 document.getElementById('btn-start').addEventListener('click', () => sendMsg({ type: 'start' }));
+document.getElementById('btn-pass-turn').addEventListener('click', () => sendMsg({ type: 'pass_turn' }));
 document.getElementById('btn-toggle-hints').addEventListener('click', () => sendMsg({ type: 'toggle_hints' }));
 document.getElementById('btn-stop-lobby').addEventListener('click', () => sendMsg({ type: 'stop' }));
 document.getElementById('btn-stop-game').addEventListener('click', () => {

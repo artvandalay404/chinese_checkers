@@ -152,6 +152,18 @@ async def handle_move(ws: WebSocket, data: dict, player_id: str):
         await send_error(ws, str(e))
 
 
+async def handle_pass_turn(ws: WebSocket, player_id: str):
+    current = game.get_current_player()
+    if not current or current["id"] != player_id:
+        await send_error(ws, "It's not your turn")
+        return
+    game._advance_turn()
+    await broadcast({
+        "type": "moved",
+        "state": game.get_state(),
+    })
+
+
 async def handle_toggle_hints(ws: WebSocket, player_id: str):
     if player_id != game.host_id:
         await send_error(ws, "Only the host can toggle move hints")
@@ -200,6 +212,9 @@ async def websocket_endpoint(ws: WebSocket):
             elif msg_type == "move" and player_id:
                 await handle_move(ws, data, player_id)
 
+            elif msg_type == "pass_turn" and player_id:
+                await handle_pass_turn(ws, player_id)
+
             elif msg_type == "toggle_hints" and player_id:
                 await handle_toggle_hints(ws, player_id)
 
@@ -217,8 +232,11 @@ async def websocket_endpoint(ws: WebSocket):
         if player_id:
             connections.pop(player_id, None)
             if game.phase in ("lobby", "playing"):
-                game.remove_player(player_id)
-                if game.phase == "finished" and game.winner is not None:
+                result = game.remove_player(player_id)
+                if result["host_left"]:
+                    await broadcast({"type": "stopped", "message": "The host left the game."})
+                    connections.clear()
+                elif game.phase == "finished" and game.winner is not None:
                     await broadcast({
                         "type": "game_over",
                         "state": game.get_state(),
